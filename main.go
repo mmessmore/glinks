@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/mmessmore/glinks/cpu"
 	"time"
+	"github.com/mmessmore/glinks/cpu"
+	"github.com/mmessmore/glinks/disk"
+	"github.com/mmessmore/glinks/load"
 )
 
 
@@ -16,5 +18,11 @@ func main() {
 	_, json_delta := cpu.Delta(data_one, data_two)
 	fmt.Println("CPU DELTA")
 	fmt.Print(json_delta)
+
+	_, json_disk := disk.Load()
+	fmt.Print(json_disk)
+
+	_, json_load := load.Load()
+	fmt.Print(json_load)
 
 }

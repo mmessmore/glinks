@@ -6,8 +6,10 @@
       <w>intr</w>
       <w>intrs</w>
       <w>iowait</w>
+      <w>perdy</w>
       <w>procs</w>
       <w>softirq</w>
+      <w>subfields</w>
     </words>
   </dictionary>
 </component>
