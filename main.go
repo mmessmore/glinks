@@ -6,6 +6,7 @@ import (
 	"github.com/mmessmore/glinks/cpu"
 	"github.com/mmessmore/glinks/disk"
 	"github.com/mmessmore/glinks/load"
+	"github.com/mmessmore/glinks/mem"
 )
 
 
@@ -25,4 +26,6 @@ func main() {
 	_, json_load := load.Load()
 	fmt.Print(json_load)
 
+	_, json_mem := mem.Load()
+	fmt.Print(json_mem)
 }
