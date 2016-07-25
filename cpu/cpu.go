@@ -42,7 +42,6 @@ type IntrInfo struct {
 }
 
 // Data holds all values held by /proc/stats
-// Delta returns the difference
 type Data struct {
 	Cpu          CpuInfo
 	Processors   []CpuInfo
@@ -56,6 +55,19 @@ type Data struct {
 	Time         time.Time
 }
 
+// Data holds all values held by /proc/stats
+type Delta struct {
+	Cpu          CpuInfo
+	Processors   []CpuInfo
+	Intr         IntrInfo
+	Ctxt         int
+	Btime        int
+	Processes    int
+	ProcsRunning int
+	ProcsBlocked int
+	SoftIrq      IntrInfo
+	Duration     time.Duration
+}
 
 // loadIntr creates an IntrInfo from the line of text
 func loadIntr(fields []string)IntrInfo {
@@ -162,9 +174,8 @@ func Load() (Data, string) {
 // Delta computes the difference between a first and second Data element
 // second is assumed to be later in time than first
 // CPU statistics are reported back as percentages of use rather than Jiffies
-func Delta(first Data, second Data) (Data, string){
-	diff := Data{}
-	// diff.Time = second.Time.Sub(first.Time)
+func Diff(first Data, second Data) (Delta, string){
+	diff := Delta{Duration:second.Time.Sub(first.Time)}
 	diff.Cpu = deltaCpu(first.Cpu, second.Cpu)
 	diff.Processors = make([]CpuInfo, len(second.Processors))
 	for i := range second.Processors {
@@ -183,7 +194,6 @@ func Delta(first Data, second Data) (Data, string){
 	check(err)
 
 	return diff, string(perdy)
-
 }
 
 // deltaCpu computes percentage of use over time for each field
