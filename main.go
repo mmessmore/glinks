@@ -1,16 +1,17 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"time"
 	"github.com/mmessmore/glinks/cpu"
 	"github.com/mmessmore/glinks/disk"
+	"github.com/mmessmore/glinks/fh"
+	"github.com/mmessmore/glinks/iface"
+	"github.com/mmessmore/glinks/inode"
 	"github.com/mmessmore/glinks/load"
 	"github.com/mmessmore/glinks/mem"
-	"github.com/mmessmore/glinks/iface"
-	"flag"
+	"time"
 )
-
 
 // run that shit dawg
 func main() {
@@ -20,6 +21,8 @@ func main() {
 	var loadFlag = flag.Bool("load", false, "Run Load Metrics")
 	var memFlag = flag.Bool("mem", false, "Run Memory Metrics")
 	var ifaceFlag = flag.Bool("iface", false, "Run Network Interface Metrics")
+	var fhFlag = flag.Bool("fh", false, "Run File Handle Metrics")
+	var inodeFlag = flag.Bool("inode", false, "Run INode Metrics")
 	var allFlag = flag.Bool("all", false, "Run all Metrics")
 
 	flag.Parse()
@@ -58,6 +61,18 @@ func main() {
 		iface_data_two, _ := iface.Load()
 		_, json_iface := iface.Diff(iface_data_one, iface_data_two)
 		fmt.Print(json_iface)
+		fmt.Println("")
+	}
+
+	if *fhFlag || *allFlag {
+		_, json_fh := fh.Load()
+		fmt.Print(json_fh)
+		fmt.Println("")
+	}
+
+	if *inodeFlag || *allFlag {
+		_, json_inode := inode.Load()
+		fmt.Print(json_inode)
 		fmt.Println("")
 	}
 }
