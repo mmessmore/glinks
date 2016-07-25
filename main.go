@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"github.com/mmessmore/glinks/cpu"
 	"github.com/mmessmore/glinks/disk"
+	"github.com/mmessmore/glinks/entropy"
 	"github.com/mmessmore/glinks/fh"
 	"github.com/mmessmore/glinks/iface"
 	"github.com/mmessmore/glinks/inode"
 	"github.com/mmessmore/glinks/load"
 	"github.com/mmessmore/glinks/mem"
+	"github.com/mmessmore/glinks/pty"
 	"time"
 )
 
@@ -23,6 +25,8 @@ func main() {
 	var ifaceFlag = flag.Bool("iface", false, "Run Network Interface Metrics")
 	var fhFlag = flag.Bool("fh", false, "Run File Handle Metrics")
 	var inodeFlag = flag.Bool("inode", false, "Run INode Metrics")
+	var ptyFlag = flag.Bool("pty", false, "Run PTY Metrics")
+	var entropyFlag = flag.Bool("entropy", false, "Run Entropy Metrics")
 	var allFlag = flag.Bool("all", false, "Run all Metrics")
 
 	flag.Parse()
@@ -73,6 +77,18 @@ func main() {
 	if *inodeFlag || *allFlag {
 		_, json_inode := inode.Load()
 		fmt.Print(json_inode)
+		fmt.Println("")
+	}
+
+	if *ptyFlag || *allFlag {
+		_, json_pty := pty.Load()
+		fmt.Print(json_pty)
+		fmt.Println("")
+	}
+
+	if *entropyFlag || *allFlag {
+		_, json_entropy := entropy.Load()
+		fmt.Print(json_entropy)
 		fmt.Println("")
 	}
 }
