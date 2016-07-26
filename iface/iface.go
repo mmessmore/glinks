@@ -1,50 +1,49 @@
 package iface
 
 import (
-	"encoding/json"
+	"bufio"
 	"fmt"
 	"log"
-	"strconv"
-	"time"
 	"os"
-	"bufio"
+	"strconv"
 	"strings"
+	"time"
 )
 
-
 const TESTING bool = true
+
 var TESTITR int = 1
 
 type IfaceInfo struct {
-	RxBytes int
-	RxPackets int
-	RxErrs int
-	RxDrop int
-	RxFifo int
-	RxFrame int
+	RxBytes      int
+	RxPackets    int
+	RxErrs       int
+	RxDrop       int
+	RxFifo       int
+	RxFrame      int
 	RxCompressed int
-	RxMulticast int
-	TxBytes int
-	TxPackets int
-	TxErrs int
-	TxDrop int
-	TxFifo int
-	TxColls int
-	TxCarrier int
+	RxMulticast  int
+	TxBytes      int
+	TxPackets    int
+	TxErrs       int
+	TxDrop       int
+	TxFifo       int
+	TxColls      int
+	TxCarrier    int
 	TxCompressed int
 }
 
 type Data struct {
-	Interfaces map[string] IfaceInfo
-	Time time.Time
+	Interfaces map[string]IfaceInfo
+	Time       time.Time
 }
 
 type Delta struct {
-	Interfaces map[string] IfaceInfo
+	Interfaces map[string]IfaceInfo
 	Duration   time.Duration
 }
 
-func Load() (Data, string) {
+func Load() Data {
 	ifaceFile := "/proc/net/dev"
 
 	file, err := os.Open(ifaceFile)
@@ -65,27 +64,23 @@ func Load() (Data, string) {
 	for scanner.Scan() {
 		fields := strings.Fields(scanner.Text())
 		// skip the headers on the text table
-		if ! strings.Contains(fields[0], ":") {
+		if !strings.Contains(fields[0], ":") {
 			continue
 		}
 		iface := strings.Trim(fields[0], " ")
-		iface = iface[0:len(iface) - 1]
+		iface = iface[0 : len(iface)-1]
 		data.Interfaces[iface] = loadLine(fields)
 	}
 
-	perdy, err := json.MarshalIndent(data, "", "    ")
-	check(err)
-	return data, string(perdy)
+	return data
 }
 
-func Diff(first Data, second Data) (Delta, string) {
+func Diff(first Data, second Data) Delta {
 	delta := Delta{Duration: second.Time.Sub(first.Time), Interfaces: make(map[string]IfaceInfo)}
 	for k := range second.Interfaces {
 		delta.Interfaces[k] = diffLine(first.Interfaces[k], second.Interfaces[k])
 	}
-	perdy, err := json.MarshalIndent(delta, "", "    ")
-	check(err)
-	return delta, string(perdy)
+	return delta
 }
 
 func loadLine(fields []string) IfaceInfo {

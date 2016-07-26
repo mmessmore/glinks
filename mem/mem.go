@@ -1,67 +1,71 @@
 package mem
 
 import (
-	"encoding/json"
+	"bufio"
 	"fmt"
 	"log"
-	"strconv"
-	"time"
 	"os"
-	"bufio"
+	"strconv"
 	"strings"
+	"time"
 )
 
 const TESTING bool = true
+
 var TESTITR int = 1
 
 type Data struct {
-	MemTotal int
-	MemFree int
-	MemAvailable int
-	Buffers int
-	Cached int
-	SwapCached int
-	Active int
-	Inactive int
-	ActiveAnon int
-	InactiveAnon int
-	ActiveFile int
-	InactiveFile int
-	Unevictable int
-	Mlocked int
-	SwapTotal int
-	SwapFree int
-	Dirty int
-	Writeback int
-	AnonPages int
-	Mapped int
-	Shmem int
-	Slab int
-	SReclaimable int
-	SUnreclaim int
-	KernelStack int
-	PageTables int
-	NFS_Unstable int
-	Bounce int
-	WritebackTmp int
-	CommitLimit int
-	Committed_AS int
-	VmallocTotal int
-	VmallocUsed int
-	VmallocChunk int
+	MemTotal          int
+	MemFree           int
+	MemAvailable      int
+	Buffers           int
+	Cached            int
+	SwapCached        int
+	Active            int
+	Inactive          int
+	ActiveAnon        int
+	InactiveAnon      int
+	ActiveFile        int
+	InactiveFile      int
+	Unevictable       int
+	Mlocked           int
+	SwapTotal         int
+	SwapFree          int
+	Dirty             int
+	Writeback         int
+	AnonPages         int
+	Mapped            int
+	Shmem             int
+	Slab              int
+	SReclaimable      int
+	SUnreclaim        int
+	KernelStack       int
+	PageTables        int
+	NFS_Unstable      int
+	Bounce            int
+	WritebackTmp      int
+	CommitLimit       int
+	Committed_AS      int
+	VmallocTotal      int
+	VmallocUsed       int
+	VmallocChunk      int
 	HardwareCorrupted int
-	AnonHugePages int
-	HugePages_Total int
-	HugePages_Free int
-	HugePages_Rsvd int
-	HugePages_Surp int
-	Hugepagesize int
-	DirectMap4k int
-	DirectMap2M int
-	Time time.Time
+	AnonHugePages     int
+	HugePages_Total   int
+	HugePages_Free    int
+	HugePages_Rsvd    int
+	HugePages_Surp    int
+	Hugepagesize      int
+	DirectMap4k       int
+	DirectMap2M       int
+	Time              time.Time
 }
 
-func Load() (Data, string) {
+func (*Data) isSerializable() bool {
+	return true
+}
+
+func Load() Data {
 	memInfoFile := "/proc/meminfo"
 
 	file, err := os.Open(memInfoFile)
@@ -173,9 +177,7 @@ func Load() (Data, string) {
 
 	}
 
-	perdy, err := json.MarshalIndent(data, "", "    ")
-		check(err)
-		return data, string(perdy)
+	return data
 }
 
 func check(e error) {

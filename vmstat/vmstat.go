@@ -1,4 +1,4 @@
-package entropy
+package vmstat
 
 import (
 	"bufio"
@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -14,31 +15,35 @@ const TESTING bool = true
 var TESTITR int = 1
 
 type Data struct {
-	Available int
-	Time      time.Time
+	Stats map[string]int
+	Time  time.Time
 }
 
 func Load() Data {
-	entropyFile := "/proc/sys/kernel/random/entropy_avail"
-	file, err := os.Open(entropyFile)
+	vmstatFile := "/proc/vmstat"
+
+	file, err := os.Open(vmstatFile)
+
 	// for testing on non-Linux OSes I have an example copied off a linux host
 	if TESTING {
 		if os.IsNotExist(err) {
 			log.Print("Falling back to dummy data")
-			file, err = os.Open(fmt.Sprintf("dummy_data/proc_sys_kernel_random_entropy_avail.%d", TESTITR))
+			file, err = os.Open(fmt.Sprintf("dummy_data/proc_vmstat.%d", TESTITR))
 			TESTITR += 1
 		}
 	}
 	defer file.Close()
 	check(err)
 
-	data := Data{Time: time.Now()}
+	data := Data{Time: time.Now(), Stats: make(map[string]int)}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		data.Available = atoi(scanner.Text())
+		fields := strings.Fields(scanner.Text())
+		data.Stats[fields[0]] = atoi(fields[1])
 	}
 
 	return data
+
 }
 
 func check(e error) {

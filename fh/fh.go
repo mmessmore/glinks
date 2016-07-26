@@ -2,7 +2,6 @@ package fh
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -22,7 +21,7 @@ type Data struct {
 	Time time.Time
 }
 
-func Load() (Data, string) {
+func Load() Data {
 	fhFile := "/proc/sys/fs/file-nr"
 
 	file, err := os.Open(fhFile)
@@ -47,9 +46,7 @@ func Load() (Data, string) {
 		data.Max = atoi(fields[2])
 	}
 
-	perdy, err := json.MarshalIndent(data, "", "    ")
-	check(err)
-	return data, string(perdy)
+	return data
 }
 
 func check(e error) {

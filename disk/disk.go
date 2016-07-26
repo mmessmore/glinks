@@ -1,41 +1,40 @@
 package disk
 
 import (
-	"os"
-	"log"
-	"fmt"
-	"strconv"
-	"time"
 	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
 	"strings"
-	"encoding/json"
+	"time"
 )
 
 const TESTING bool = true
+
 var TESTITR int = 1
 
 type AccessStat struct {
-	Count int
-	Merged int
-	Sectors int
+	Count        int
+	Merged       int
+	Sectors      int
 	Milliseconds int
 }
 
 type DiskData struct {
-	Reads AccessStat
-	Writes AccessStat
-	IoInProgress int
-	IoMilliseconds int
+	Reads                  AccessStat
+	Writes                 AccessStat
+	IoInProgress           int
+	IoMilliseconds         int
 	IoWeightedMilliseconds int
 }
 
 type Data struct {
-	Time time.Time
-	Disks map[string] DiskData
+	Time  time.Time
+	Disks map[string]DiskData
 }
 
-
-func Load() (Data, string) {
+func Load() Data {
 	disk_stat_file := "/proc/diskstats"
 
 	file, err := os.Open(disk_stat_file)
@@ -59,29 +58,27 @@ func Load() (Data, string) {
 		data.Disks[name] = loadLine(fields[3:])
 	}
 
-	perdy, err := json.MarshalIndent(data, "", "    ")
-	check(err)
-	return data, string(perdy)
+	return data
 }
 
-func loadLine(fields[] string) DiskData{
+func loadLine(fields []string) DiskData {
 	data := DiskData{}
 
 	data.Reads = AccessStat{
-		Count: atoi(fields[0]),
-		Merged: atoi(fields[1]),
-		Sectors: atoi(fields[2]),
+		Count:        atoi(fields[0]),
+		Merged:       atoi(fields[1]),
+		Sectors:      atoi(fields[2]),
 		Milliseconds: atoi(fields[3]),
 	}
 	data.Writes = AccessStat{
-		Count: atoi(fields[4]),
-		Merged: atoi(fields[5]),
-		Sectors: atoi(fields[6]),
+		Count:        atoi(fields[4]),
+		Merged:       atoi(fields[5]),
+		Sectors:      atoi(fields[6]),
 		Milliseconds: atoi(fields[7]),
 	}
 	data.IoInProgress = atoi(fields[8])
 	data.IoMilliseconds = atoi(fields[9])
-	data.IoWeightedMilliseconds  = atoi(fields[10])
+	data.IoWeightedMilliseconds = atoi(fields[10])
 
 	return data
 }

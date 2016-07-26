@@ -2,19 +2,19 @@
 package cpu
 
 import (
+	"bufio"
+	"fmt"
 	"log"
 	"os"
-	"bufio"
-	"strings"
-	"strconv"
-	"time"
 	"runtime"
-	"encoding/json"
-	"fmt"
+	"strconv"
+	"strings"
+	"time"
 )
 
 // Allow for testing on non-Linux platforms like my laptop
 const TESTING bool = true
+
 var TESTITR int = 1
 
 // CpuInfo encapsulates CPU statistics.
@@ -70,10 +70,10 @@ type Delta struct {
 }
 
 // loadIntr creates an IntrInfo from the line of text
-func loadIntr(fields []string)IntrInfo {
+func loadIntr(fields []string) IntrInfo {
 	info := IntrInfo{
 		Total: atoi(fields[1]),
-		Intrs: make([]int, len(fields) - 1, len(fields)),
+		Intrs: make([]int, len(fields)-1, len(fields)),
 	}
 	for index, val := range fields[2:] {
 		info.Intrs[index] = atoi(val)
@@ -119,7 +119,7 @@ func loadCpu(fields []string) CpuInfo {
 }
 
 // Load takes the data from /proc/stat and presents a usable data structure
-func Load() (Data, string) {
+func Load() Data {
 	cpu_stat_file := "/proc/stat"
 
 	file, err := os.Open(cpu_stat_file)
@@ -137,7 +137,7 @@ func Load() (Data, string) {
 
 	data := Data{Time: time.Now()}
 	cpuCount := runtime.NumCPU()
-	data.Processors = make([]CpuInfo, cpuCount, cpuCount * 2)
+	data.Processors = make([]CpuInfo, cpuCount, cpuCount*2)
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		fields := strings.Fields(scanner.Text())
@@ -166,16 +166,14 @@ func Load() (Data, string) {
 
 	check(scanner.Err())
 
-	perdy, err := json.MarshalIndent(data, "", "    ")
-	check(err)
-	return data, string(perdy)
+	return data
 }
 
 // Delta computes the difference between a first and second Data element
 // second is assumed to be later in time than first
 // CPU statistics are reported back as percentages of use rather than Jiffies
-func Diff(first Data, second Data) (Delta, string){
-	diff := Delta{Duration:second.Time.Sub(first.Time)}
+func Diff(first Data, second Data) Delta {
+	diff := Delta{Duration: second.Time.Sub(first.Time)}
 	diff.Cpu = deltaCpu(first.Cpu, second.Cpu)
 	diff.Processors = make([]CpuInfo, len(second.Processors))
 	for i := range second.Processors {
@@ -190,10 +188,8 @@ func Diff(first Data, second Data) (Delta, string){
 	diff.Processes = second.Processes - first.Processes
 	diff.ProcsRunning = second.ProcsRunning - first.ProcsRunning
 	diff.ProcsBlocked = second.ProcsBlocked - first.ProcsBlocked
-	perdy, err := json.MarshalIndent(diff, "", "    ")
-	check(err)
 
-	return diff, string(perdy)
+	return diff
 }
 
 // deltaCpu computes percentage of use over time for each field
@@ -215,7 +211,7 @@ func deltaCpu(first CpuInfo, second CpuInfo) CpuInfo {
 }
 
 func percent(first int, second int, total int) int {
-	return int(float32(second - first) / float32(total) * 100.0)
+	return int(float32(second-first) / float32(total) * 100.0)
 }
 
 // deltaIntr just calculates the difference in each field between two points in time
@@ -228,7 +224,6 @@ func deltaIntr(first IntrInfo, second IntrInfo) IntrInfo {
 	}
 	return diff
 }
-
 
 // check panics on failure
 func check(e error) {

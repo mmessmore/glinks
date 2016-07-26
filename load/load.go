@@ -1,30 +1,34 @@
 package load
 
 import (
-	"os"
-	"log"
-	"fmt"
-	"time"
 	"bufio"
-	"strings"
-	"encoding/json"
+	"fmt"
+	"log"
+	"os"
 	"strconv"
+	"strings"
+	"time"
 )
 
 const TESTING bool = true
+
 var TESTITR int = 1
 
 type Data struct {
-	FiveMin float32
-	TenMin float32
+	FiveMin    float32
+	TenMin     float32
 	FifteenMin float32
 	RunableEnt int
-	TotalEnt int
-	LastPid int
-	Time time.Time
+	TotalEnt   int
+	LastPid    int
+	Time       time.Time
 }
 
-func Load() (Data, string) {
+func (*Data) isSerializable() bool {
+	return true
+}
+
+func Load() Data {
 	loadAvgFile := "/proc/loadavg"
 
 	file, err := os.Open(loadAvgFile)
@@ -55,9 +59,7 @@ func Load() (Data, string) {
 		data.LastPid = atoi(fields[4])
 	}
 
-	perdy, err := json.MarshalIndent(data, "", "    ")
-	check(err)
-	return data, string(perdy)
+	return data
 }
 
 func check(e error) {

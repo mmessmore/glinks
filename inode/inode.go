@@ -2,7 +2,6 @@ package inode
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -21,7 +20,7 @@ type Data struct {
 	Time   time.Time
 }
 
-func Load() (Data, string) {
+func Load() Data {
 	inodeFile := "/proc/sys/fs/inode-nr"
 
 	file, err := os.Open(inodeFile)
@@ -45,9 +44,7 @@ func Load() (Data, string) {
 		data.Free = atoi(fields[1])
 	}
 
-	perdy, err := json.MarshalIndent(data, "", "    ")
-	check(err)
-	return data, string(perdy)
+	return data
 }
 
 func check(e error) {

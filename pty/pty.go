@@ -2,7 +2,6 @@ package pty
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -20,7 +19,11 @@ type Data struct {
 	Time   time.Time
 }
 
-func Load() (Data, string) {
+func (*Data) isSerializable() bool {
+	return true
+}
+
+func Load() Data {
 	maxPtyFile := "/proc/sys/kernel/pty/max"
 	file, err := os.Open(maxPtyFile)
 	// for testing on non-Linux OSes I have an example copied off a linux host
@@ -58,9 +61,7 @@ func Load() (Data, string) {
 		data.Number = atoi(scanner.Text())
 	}
 
-	perdy, err := json.MarshalIndent(data, "", "    ")
-	check(err)
-	return data, string(perdy)
+	return data
 }
 
 func check(e error) {

@@ -1,4 +1,4 @@
-package entropy
+package uptime
 
 import (
 	"bufio"
@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -14,18 +15,19 @@ const TESTING bool = true
 var TESTITR int = 1
 
 type Data struct {
-	Available int
-	Time      time.Time
+	Uptime float32
+	Idle   float32
+	Time   time.Time
 }
 
 func Load() Data {
-	entropyFile := "/proc/sys/kernel/random/entropy_avail"
-	file, err := os.Open(entropyFile)
+	uptimeFile := "/proc/uptime"
+	file, err := os.Open(uptimeFile)
 	// for testing on non-Linux OSes I have an example copied off a linux host
 	if TESTING {
 		if os.IsNotExist(err) {
 			log.Print("Falling back to dummy data")
-			file, err = os.Open(fmt.Sprintf("dummy_data/proc_sys_kernel_random_entropy_avail.%d", TESTITR))
+			file, err = os.Open(fmt.Sprintf("dummy_data/proc_uptime.%d", TESTITR))
 			TESTITR += 1
 		}
 	}
@@ -35,7 +37,10 @@ func Load() Data {
 	data := Data{Time: time.Now()}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		data.Available = atoi(scanner.Text())
+		fields := strings.Fields(scanner.Text())
+		data.Uptime = atof(fields[0])
+		data.Idle = atof(fields[1])
+
 	}
 
 	return data
@@ -48,10 +53,8 @@ func check(e error) {
 	}
 }
 
-// atoi converts a string to an integer and panic if something is awry.  This should not be a problem given that we
-// are dealing with a very fixed format
-func atoi(s string) int {
-	val, err := strconv.Atoi(s)
+func atof(s string) float32 {
+	val, err := strconv.ParseFloat(s, 32)
 	check(err)
-	return val
+	return float32(val)
 }
