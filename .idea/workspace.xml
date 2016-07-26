@@ -20,27 +20,9 @@
     <details controls="false" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2807f031-a965-4b8e-8560-5fb506cc03c4" name="Default" comment="Rounded out /proc support&#10;Updated README.md with too many words&#10;Started code cleanup">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/dummy_data/proc_uptime.1" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/dummy_data/proc_uptime.2" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/dummy_data/proc_vmstat.1" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/dummy_data/proc_vmstat.2" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/glinksd/main.go" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/uptime/uptime.go" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/vmstat/vmstat.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/GOPATH__glinks_.xml" afterPath="$PROJECT_DIR$/.idea/libraries/GOPATH__glinks_.xml" />
+    <list default="true" id="2807f031-a965-4b8e-8560-5fb506cc03c4" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cpu/cpu.go" afterPath="$PROJECT_DIR$/cpu/cpu.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/disk/disk.go" afterPath="$PROJECT_DIR$/disk/disk.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/entropy/entropy.go" afterPath="$PROJECT_DIR$/entropy/entropy.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fh/fh.go" afterPath="$PROJECT_DIR$/fh/fh.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/iface/iface.go" afterPath="$PROJECT_DIR$/iface/iface.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/inode/inode.go" afterPath="$PROJECT_DIR$/inode/inode.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/load/load.go" afterPath="$PROJECT_DIR$/load/load.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.go" afterPath="$PROJECT_DIR$/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mem/mem.go" afterPath="$PROJECT_DIR$/mem/mem.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pty/pty.go" afterPath="$PROJECT_DIR$/pty/pty.go" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/glinksd/main.go" afterPath="$PROJECT_DIR$/glinksd/main.go" />
     </list>
     <ignored path="glinks.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -74,10 +56,10 @@
       <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/glinksd/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+            <state relative-caret-position="735">
+              <caret line="49" column="25" selection-start-line="49" selection-start-column="25" selection-end-line="49" selection-end-column="25" />
               <folding>
-                <element signature="e#14#47#0" expanded="true" />
+                <element signature="e#14#452#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -106,7 +88,6 @@
         <option value="$PROJECT_DIR$/inode/fh.go" />
         <option value="$PROJECT_DIR$/entropy/pty.go" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/glinksd/main.go" />
         <option value="$PROJECT_DIR$/load/load.go" />
         <option value="$PROJECT_DIR$/mem/mem.go" />
         <option value="$PROJECT_DIR$/pty/pty.go" />
@@ -119,13 +100,13 @@
         <option value="$PROJECT_DIR$/inode/inode.go" />
         <option value="$PROJECT_DIR$/vmstat/vmstat.go" />
         <option value="$PROJECT_DIR$/uptime/uptime.go" />
+        <option value="$PROJECT_DIR$/glinksd/main.go" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-1" />
     <option name="y" value="23" />
-    <option name="width" value="1278" />
+    <option name="width" value="1280" />
     <option name="height" value="734" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -895,12 +876,19 @@
       <option name="project" value="LOCAL" />
       <updated>1469414859080</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Rounded out /proc support&#10;Updated README.md with too many words&#10;Started code cleanup">
+      <created>1469500826496</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1469500826496</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TaskboardConfiguration" showUserStories="true" showDefects="true" showBlocked="true" showStatuses="&lt;all&gt;" assignTask="false" deactivateItem="false" activateItem="false" />
   <component name="ToolWindowManager">
-    <frame x="-1" y="23" width="1278" height="734" extended-state="6" />
+    <frame x="0" y="23" width="1280" height="734" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -915,7 +903,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24959612" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="HP ALI" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32866043" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24959612" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -1069,7 +1057,7 @@
         <state relative-caret-position="330">
           <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
           <folding>
-            <element signature="e#15#84#0" expanded="true" />
+            <element signature="e#15#84#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1134,10 +1122,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/glinksd/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+        <state relative-caret-position="735">
+          <caret line="49" column="25" selection-start-line="49" selection-start-column="25" selection-end-line="49" selection-end-column="25" />
           <folding>
-            <element signature="e#14#47#0" expanded="true" />
+            <element signature="e#14#452#0" expanded="true" />
           </folding>
         </state>
       </provider>
