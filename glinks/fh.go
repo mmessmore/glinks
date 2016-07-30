@@ -1,27 +1,25 @@
-package fh
+package glinks
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
 
-const TESTING bool = true
-
-var TESTITR int = 1
-
-type Data struct {
+type FhData struct {
 	Used int
 	//Free int
 	Max  int
 	Time time.Time
 }
 
-func Load() Data {
+func (d FhData) SampleTime() int64 {
+	return d.Time.Unix()
+}
+
+func FhLoad() FhData {
 	fhFile := "/proc/sys/fs/file-nr"
 
 	file, err := os.Open(fhFile)
@@ -30,14 +28,13 @@ func Load() Data {
 	if TESTING {
 		if os.IsNotExist(err) {
 			log.Print("Falling back to dummy data")
-			file, err = os.Open(fmt.Sprintf("dummy_data/proc_sys_fs_file-nr.%d", TESTITR))
-			TESTITR += 1
+			file, err = os.Open("dummy_data/proc_sys_fs_file-nr.1")
 		}
 	}
 	defer file.Close()
 	check(err)
 
-	data := Data{Time: time.Now()}
+	data := FhData{Time: time.Now()}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		fields := strings.Fields(scanner.Text())
@@ -47,19 +44,4 @@ func Load() Data {
 	}
 
 	return data
-}
-
-func check(e error) {
-	if e != nil {
-		fmt.Println(e)
-		log.Panic(e)
-	}
-}
-
-// atoi converts a string to an integer and panic if something is awry.  This should not be a problem given that we
-// are dealing with a very fixed format
-func atoi(s string) int {
-	val, err := strconv.Atoi(s)
-	check(err)
-	return val
 }

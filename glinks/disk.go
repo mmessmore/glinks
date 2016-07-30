@@ -1,18 +1,12 @@
-package disk
+package glinks
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
-
-const TESTING bool = true
-
-var TESTITR int = 1
 
 type AccessStat struct {
 	Count        int
@@ -21,7 +15,7 @@ type AccessStat struct {
 	Milliseconds int
 }
 
-type DiskData struct {
+type DiskInfo struct {
 	Reads                  AccessStat
 	Writes                 AccessStat
 	IoInProgress           int
@@ -29,12 +23,16 @@ type DiskData struct {
 	IoWeightedMilliseconds int
 }
 
-type Data struct {
+type DiskData struct {
 	Time  time.Time
-	Disks map[string]DiskData
+	Disks map[string]DiskInfo
 }
 
-func Load() Data {
+func (d DiskData) SampleTime() int64 {
+	return d.Time.Unix()
+}
+
+func DiskLoad() DiskData {
 	disk_stat_file := "/proc/diskstats"
 
 	file, err := os.Open(disk_stat_file)
@@ -43,26 +41,25 @@ func Load() Data {
 	if TESTING {
 		if os.IsNotExist(err) {
 			log.Print("Falling back to dummy data")
-			file, err = os.Open(fmt.Sprintf("dummy_data/proc_diskstats.%d", TESTITR))
-			TESTITR += 1
+			file, err = os.Open("dummy_data/proc_diskstats.1")
 		}
 	}
 	defer file.Close()
 	check(err)
 
-	data := Data{Time: time.Now(), Disks: make(map[string]DiskData)}
+	data := DiskData{Time: time.Now(), Disks: make(map[string]DiskInfo)}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		fields := strings.Fields(scanner.Text())
 		name := fields[2]
-		data.Disks[name] = loadLine(fields[3:])
+		data.Disks[name] = loadDiskLine(fields[3:])
 	}
 
 	return data
 }
 
-func loadLine(fields []string) DiskData {
-	data := DiskData{}
+func loadDiskLine(fields []string) DiskInfo {
+	data := DiskInfo{}
 
 	data.Reads = AccessStat{
 		Count:        atoi(fields[0]),
@@ -81,18 +78,4 @@ func loadLine(fields []string) DiskData {
 	data.IoWeightedMilliseconds = atoi(fields[10])
 
 	return data
-}
-
-func check(e error) {
-	if e != nil {
-		log.Panic(e)
-	}
-}
-
-// atoi converts a string to an integer and panic if something is awry.  This should not be a problem given that we
-// are dealing with a very fixed format
-func atoi(s string) int {
-	val, err := strconv.Atoi(s)
-	check(err)
-	return val
 }

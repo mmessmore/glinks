@@ -1,18 +1,13 @@
-package iface
+package glinks
 
 import (
 	"bufio"
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
-
-const TESTING bool = true
-
-var TESTITR int = 1
 
 type IfaceInfo struct {
 	RxBytes      int
@@ -33,17 +28,26 @@ type IfaceInfo struct {
 	TxCompressed int
 }
 
-type Data struct {
+type IfaceData struct {
 	Interfaces map[string]IfaceInfo
 	Time       time.Time
 }
 
-type Delta struct {
-	Interfaces map[string]IfaceInfo
-	Duration   time.Duration
+func (d *IfaceData) SampleTime() int64 {
+	return d.Time.Unix()
 }
 
-func Load() Data {
+type IfaceDelta struct {
+	Interfaces map[string]IfaceInfo
+	Duration   time.Duration
+	Time       time.Time
+}
+
+func (d IfaceDelta) SampleTime() int64 {
+	return d.Time.Unix()
+}
+
+func IfaceLoad() IfaceData {
 	ifaceFile := "/proc/net/dev"
 
 	file, err := os.Open(ifaceFile)
@@ -59,7 +63,7 @@ func Load() Data {
 	defer file.Close()
 	check(err)
 
-	data := Data{Time: time.Now(), Interfaces: make(map[string]IfaceInfo)}
+	data := IfaceData{Time: time.Now(), Interfaces: make(map[string]IfaceInfo)}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		fields := strings.Fields(scanner.Text())
@@ -69,21 +73,28 @@ func Load() Data {
 		}
 		iface := strings.Trim(fields[0], " ")
 		iface = iface[0 : len(iface)-1]
-		data.Interfaces[iface] = loadLine(fields)
+		data.Interfaces[iface] = loadIfaceLine(fields)
 	}
 
 	return data
 }
 
-func Diff(first Data, second Data) Delta {
-	delta := Delta{Duration: second.Time.Sub(first.Time), Interfaces: make(map[string]IfaceInfo)}
+func IfaceDiff(first IfaceData, second IfaceData) IfaceDelta {
+	delta := IfaceDelta{
+		Duration:   second.Time.Sub(first.Time),
+		Interfaces: make(map[string]IfaceInfo),
+		Time:       second.Time,
+	}
 	for k := range second.Interfaces {
-		delta.Interfaces[k] = diffLine(first.Interfaces[k], second.Interfaces[k])
+		delta.Interfaces[k] = diffIfaceLine(first.Interfaces[k], second.Interfaces[k])
+	}
+	if TESTING {
+		TESTITR = 1
 	}
 	return delta
 }
 
-func loadLine(fields []string) IfaceInfo {
+func loadIfaceLine(fields []string) IfaceInfo {
 	info := IfaceInfo{}
 	info.RxBytes = atoi(fields[1])
 	info.RxPackets = atoi(fields[2])
@@ -104,7 +115,7 @@ func loadLine(fields []string) IfaceInfo {
 	return info
 }
 
-func diffLine(first IfaceInfo, second IfaceInfo) IfaceInfo {
+func diffIfaceLine(first IfaceInfo, second IfaceInfo) IfaceInfo {
 	info := IfaceInfo{}
 	info.RxBytes = second.RxBytes - first.RxBytes
 	info.RxPackets = second.RxPackets - first.RxPackets
@@ -123,19 +134,4 @@ func diffLine(first IfaceInfo, second IfaceInfo) IfaceInfo {
 	info.TxCarrier = second.TxCarrier - first.TxCarrier
 	info.TxCompressed = second.TxCompressed - first.TxCompressed
 	return info
-}
-
-func check(e error) {
-	if e != nil {
-		fmt.Println(e)
-		log.Panic(e)
-	}
-}
-
-// atoi converts a string to an integer and panic if something is awry.  This should not be a problem given that we
-// are dealing with a very fixed format
-func atoi(s string) int {
-	val, err := strconv.Atoi(s)
-	check(err)
-	return val
 }

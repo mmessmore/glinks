@@ -1,40 +1,37 @@
-package uptime
+package glinks
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
 
-const TESTING bool = true
-
-var TESTITR int = 1
-
-type Data struct {
+type UptimeData struct {
 	Uptime float32
 	Idle   float32
 	Time   time.Time
 }
 
-func Load() Data {
+func (d UptimeData) SampleTime() int64 {
+	return d.Time.Unix()
+}
+
+func UptimeLoad() UptimeData {
 	uptimeFile := "/proc/uptime"
 	file, err := os.Open(uptimeFile)
 	// for testing on non-Linux OSes I have an example copied off a linux host
 	if TESTING {
 		if os.IsNotExist(err) {
 			log.Print("Falling back to dummy data")
-			file, err = os.Open(fmt.Sprintf("dummy_data/proc_uptime.%d", TESTITR))
-			TESTITR += 1
+			file, err = os.Open("dummy_data/proc_uptime.1")
 		}
 	}
 	defer file.Close()
 	check(err)
 
-	data := Data{Time: time.Now()}
+	data := UptimeData{Time: time.Now()}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		fields := strings.Fields(scanner.Text())
@@ -44,17 +41,4 @@ func Load() Data {
 	}
 
 	return data
-}
-
-func check(e error) {
-	if e != nil {
-		fmt.Println(e)
-		log.Panic(e)
-	}
-}
-
-func atof(s string) float32 {
-	val, err := strconv.ParseFloat(s, 32)
-	check(err)
-	return float32(val)
 }

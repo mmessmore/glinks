@@ -3,6 +3,7 @@
     <words>
       <w>btime</w>
       <w>ctxt</w>
+      <w>iface</w>
       <w>intr</w>
       <w>intrs</w>
       <w>iowait</w>

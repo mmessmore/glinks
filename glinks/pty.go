@@ -1,43 +1,36 @@
-package pty
+package glinks
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"time"
 )
 
-const TESTING bool = true
-
-var TESTITR int = 1
-
-type Data struct {
+type PtyData struct {
 	Number int
 	Max    int
 	Time   time.Time
 }
 
-func (*Data) isSerializable() bool {
-	return true
+func (d PtyData) SampleTime() int64 {
+	return d.Time.Unix()
 }
 
-func Load() Data {
+func PtyLoad() PtyData {
 	maxPtyFile := "/proc/sys/kernel/pty/max"
 	file, err := os.Open(maxPtyFile)
 	// for testing on non-Linux OSes I have an example copied off a linux host
 	if TESTING {
 		if os.IsNotExist(err) {
 			log.Print("Falling back to dummy data")
-			file, err = os.Open(fmt.Sprintf("dummy_data/proc_sys_kernel_pty_max.%d", TESTITR))
-			TESTITR += 1
+			file, err = os.Open("dummy_data/proc_sys_kernel_pty_max.1")
 		}
 	}
 	defer file.Close()
 	check(err)
 
-	data := Data{Time: time.Now()}
+	data := PtyData{Time: time.Now()}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		data.Max = atoi(scanner.Text())
@@ -49,8 +42,7 @@ func Load() Data {
 	if TESTING {
 		if os.IsNotExist(err) {
 			log.Print("Falling back to dummy data")
-			file, err = os.Open(fmt.Sprintf("dummy_data/proc_sys_kernel_pty_nr.%d", TESTITR))
-			TESTITR += 1
+			file, err = os.Open("dummy_data/proc_sys_kernel_pty_nr.1")
 		}
 	}
 	defer file.Close()
@@ -62,19 +54,4 @@ func Load() Data {
 	}
 
 	return data
-}
-
-func check(e error) {
-	if e != nil {
-		fmt.Println(e)
-		log.Panic(e)
-	}
-}
-
-// atoi converts a string to an integer and panic if something is awry.  This should not be a problem given that we
-// are dealing with a very fixed format
-func atoi(s string) int {
-	val, err := strconv.Atoi(s)
-	check(err)
-	return val
 }

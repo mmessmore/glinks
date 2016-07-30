@@ -1,5 +1,5 @@
 // Package cpu parses, exposes, and does computation based on Linux /proc/stat
-package cpu
+package glinks
 
 import (
 	"bufio"
@@ -7,19 +7,13 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 )
 
-// Allow for testing on non-Linux platforms like my laptop
-const TESTING bool = true
-
-var TESTITR int = 1
-
 // CpuInfo encapsulates CPU statistics.
 // For individual data points each field is in the unit of Jiffies. Total is the sum of all fields
-// When returned by Delta, each field is a percentage of total Jiffies over the duration
+// When returned by CpuDelta, each field is a percentage of total Jiffies over the duration
 type CpuInfo struct {
 	User      int
 	Nice      int
@@ -42,7 +36,7 @@ type IntrInfo struct {
 }
 
 // Data holds all values held by /proc/stats
-type Data struct {
+type CpuData struct {
 	Cpu          CpuInfo
 	Processors   []CpuInfo
 	Intr         IntrInfo
@@ -55,8 +49,12 @@ type Data struct {
 	Time         time.Time
 }
 
+func (d CpuData) SampleTime() int64 {
+	return d.Time.Unix()
+}
+
 // Data holds all values held by /proc/stats
-type Delta struct {
+type CpuDelta struct {
 	Cpu          CpuInfo
 	Processors   []CpuInfo
 	Intr         IntrInfo
@@ -67,6 +65,11 @@ type Delta struct {
 	ProcsBlocked int
 	SoftIrq      IntrInfo
 	Duration     time.Duration
+	Time         time.Time
+}
+
+func (d CpuDelta) SampleTime() int64 {
+	return d.Time.Unix()
 }
 
 // loadIntr creates an IntrInfo from the line of text
@@ -118,8 +121,8 @@ func loadCpu(fields []string) CpuInfo {
 	return info
 }
 
-// Load takes the data from /proc/stat and presents a usable data structure
-func Load() Data {
+// CpuLoad takes the data from /proc/stat and presents a usable data structure
+func CpuLoad() CpuData {
 	cpu_stat_file := "/proc/stat"
 
 	file, err := os.Open(cpu_stat_file)
@@ -135,7 +138,7 @@ func Load() Data {
 	defer file.Close()
 	check(err)
 
-	data := Data{Time: time.Now()}
+	data := CpuData{Time: time.Now()}
 	cpuCount := runtime.NumCPU()
 	data.Processors = make([]CpuInfo, cpuCount, cpuCount*2)
 	scanner := bufio.NewScanner(file)
@@ -169,11 +172,11 @@ func Load() Data {
 	return data
 }
 
-// Delta computes the difference between a first and second Data element
+// CpuDelta computes the difference between a first and second Data element
 // second is assumed to be later in time than first
 // CPU statistics are reported back as percentages of use rather than Jiffies
-func Diff(first Data, second Data) Delta {
-	diff := Delta{Duration: second.Time.Sub(first.Time)}
+func CpuDiff(first CpuData, second CpuData) CpuDelta {
+	diff := CpuDelta{Duration: second.Time.Sub(first.Time), Time: second.Time}
 	diff.Cpu = deltaCpu(first.Cpu, second.Cpu)
 	diff.Processors = make([]CpuInfo, len(second.Processors))
 	for i := range second.Processors {
@@ -188,6 +191,9 @@ func Diff(first Data, second Data) Delta {
 	diff.Processes = second.Processes - first.Processes
 	diff.ProcsRunning = second.ProcsRunning - first.ProcsRunning
 	diff.ProcsBlocked = second.ProcsBlocked - first.ProcsBlocked
+	if TESTING {
+		TESTITR = 1
+	}
 
 	return diff
 }
@@ -223,19 +229,4 @@ func deltaIntr(first IntrInfo, second IntrInfo) IntrInfo {
 		diff.Intrs[i] = second.Intrs[i] - first.Intrs[i]
 	}
 	return diff
-}
-
-// check panics on failure
-func check(e error) {
-	if e != nil {
-		log.Panic(e)
-	}
-}
-
-// atoi converts a string to an integer and panic if something is awry.  This should not be a problem given that we
-// are dealing with a very fixed format
-func atoi(s string) int {
-	val, err := strconv.Atoi(s)
-	check(err)
-	return val
 }
