@@ -1,3 +1,0 @@
-#!/bin/bash
-
-godebug run -instrument github.com/mmessmore/glinks/cpu main.go

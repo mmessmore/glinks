@@ -1,29 +1,40 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/mmessmore/glinks/glinks"
 	"os"
-	"time"
-	"github.com/gin-gonic/gin"
+	"strings"
+
+	"github.com/mmessmore/glinks/cli"
+	"github.com/mmessmore/glinks/http"
+	"github.com/satori/go.uuid"
 )
 
-func output(d glinks.Data, is_graphite bool, prefix string) {
-	if is_graphite {
-		metrics := glinks.FromStruct(d, prefix)
-		for _, m := range metrics {
-			fmt.Println(m.String())
-		}
-	} else {
-		value, err := json.MarshalIndent(d, "", "   ")
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Printf("%s\n", string(value))
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
 		}
 	}
+	return false
+}
+
+func decode_checks(cliChecks string) []string {
+	possible_checks := []string{"cpu", "disk", "load", "mem", "iface", "fh", "inode", "pty", "entropy",
+		"uptime", "vmstat"}
+	checks := make([]string, 0, 12)
+	for _, check := range strings.Split(cliChecks, ",") {
+		if check == "all" {
+			return possible_checks
+		} else if contains(possible_checks, check) {
+			checks = append(checks, check)
+		} else {
+			fmt.Printf("Invalid check: %s", check)
+			os.Exit(22) // invalid argument
+		}
+	}
+	return checks
 }
 
 // run that shit dawg
@@ -37,138 +48,23 @@ func main() {
 	}
 
 	var doHttpd = flag.Bool("http", false, "HTTP/JSON daemon mode")
-	var cpuFlag = flag.Bool("cpu", false, "Output CPU Metrics")
-	var diskFlag = flag.Bool("disk", false, "Output Disk Metrics")
-	var loadFlag = flag.Bool("load", false, "Output Load Metrics")
-	var memFlag = flag.Bool("mem", false, "Output Memory Metrics")
-	var ifaceFlag = flag.Bool("iface", false, "Output Network Interface Metrics")
-	var fhFlag = flag.Bool("fh", false, "Output File Handle Metrics")
-	var inodeFlag = flag.Bool("inode", false, "Output INode Metrics")
-	var ptyFlag = flag.Bool("pty", false, "Output PTY Metrics")
-	var entropyFlag = flag.Bool("entropy", false, "Output Entropy Metrics")
-	var uptimeFlag = flag.Bool("uptime", false, "Output Uptime Metrics")
-	var vmstatFlag = flag.Bool("vmstat", false, "Output VMStat Metrics")
-	var allFlag = flag.Bool("all", false, "Output all Metrics")
+
+	var cliChecks = flag.String("checks", "all", "Comma separated list of checks or 'all' for all")
 	var is_graphite = flag.Bool("graphite", false, "Use graphite output instead of JSON")
 	var prefix = flag.String("graphite-prefix", hostname, "Prefix for graphite values")
-	var count = flag.Int("count", 2, "number of iterations to run")
+	var count = flag.Int("count", 1, "number of iterations to run")
 	var delay = flag.Int("delay", 1, "sleep between iterations")
+	var dbPath = flag.String("db-path", "/tmp/glinks.db", "database path")
+	var dbId = flag.String("db-id", uuid.NewV4().String(), "ID string of database session, often a UUID")
 
 	flag.Parse()
 
+	checks := decode_checks(*cliChecks)
+
 	// If we're an httpd daemon, go do that
 	if *doHttpd {
-		httpd()
-		return
+		http.Httpd(*dbPath)
+	} else {
+		cli.Cli(*dbPath, *dbId, checks, *is_graphite, *prefix, *count, *delay)
 	}
-
-	// Otherwise let's just be a CLI
-
-	lastCpu := glinks.CpuData{}
-	lastIface := glinks.IfaceData{}
-
-	for i := 1; i <= *count; i++ {
-		if *cpuFlag || *allFlag {
-			if lastCpu.Time == (time.Time{}) {
-				lastCpu = glinks.CpuLoad()
-			} else {
-				currentCpu := glinks.CpuLoad()
-				output(glinks.CpuDiff(lastCpu, currentCpu), *is_graphite, makePrefix(*prefix, "cpu"))
-				lastCpu = currentCpu
-			}
-		}
-
-		if *ifaceFlag || *allFlag {
-			if lastIface.Time == (time.Time{}) {
-				lastIface = glinks.IfaceLoad()
-			} else {
-				currentIface := glinks.IfaceLoad()
-				output(glinks.IfaceDiff(lastIface, currentIface),
-					*is_graphite,
-					makePrefix(*prefix, "network_interface"))
-				lastIface = currentIface
-			}
-		}
-
-		if *diskFlag || *allFlag {
-			output(glinks.DiskLoad(), *is_graphite, makePrefix(*prefix, "disk"))
-		}
-
-		if *loadFlag || *allFlag {
-			output(glinks.LoadLoad(), *is_graphite, makePrefix(*prefix, "load"))
-		}
-
-		if *memFlag || *allFlag {
-			output(glinks.MemLoad(), *is_graphite, makePrefix(*prefix, "memory"))
-		}
-
-		if *fhFlag || *allFlag {
-			output(glinks.FhLoad(), *is_graphite, makePrefix(*prefix, "file_handles"))
-		}
-
-		if *inodeFlag || *allFlag {
-			output(glinks.InodeLoad(), *is_graphite, makePrefix(*prefix, "inodes"))
-		}
-
-		if *ptyFlag || *allFlag {
-			output(glinks.PtyLoad(), *is_graphite, makePrefix(*prefix, "pty"))
-		}
-
-		if *entropyFlag || *allFlag {
-			output(glinks.EntropyLoad(), *is_graphite, makePrefix(*prefix, "entropy"))
-		}
-
-		if *uptimeFlag || *allFlag {
-			output(glinks.UptimeLoad(), *is_graphite, makePrefix(*prefix, "uptime"))
-		}
-
-		if *vmstatFlag || *allFlag {
-			output(glinks.VmstatLoad(), *is_graphite, makePrefix(*prefix, "vmstat"))
-		}
-		// sleep till the next go 'round
-		time.Sleep(time.Duration(*delay) * time.Second)
-	}
-}
-
-func makePrefix(prefix string, postfix string) string {
-	return fmt.Sprintf("%s.%s", prefix, postfix)
-}
-
-
-func defaultRoute(c *gin.Context) {
-	value := c.Param("stat")
-
-	switch value {
-	case "cpu":
-		c.JSON(200, glinks.CpuLoad())
-	case "disk":
-		c.JSON(200, glinks.DiskLoad())
-	case "entropy":
-		c.JSON(200, glinks.EntropyLoad())
-	case "fh":
-		c.JSON(200, glinks.FhLoad())
-	case "iface":
-		c.JSON(200, glinks.IfaceLoad())
-	case "inode":
-		c.JSON(200, glinks.InodeLoad())
-	case "load":
-		c.JSON(200, glinks.LoadLoad())
-	case "mem":
-		c.JSON(200, glinks.MemLoad())
-	case "pty":
-		c.JSON(200, glinks.PtyLoad())
-	case "uptime":
-		c.JSON(200, glinks.UptimeLoad())
-	case "vmstat":
-		c.JSON(200, glinks.VmstatLoad())
-	default:
-		c.AbortWithStatus(404)
-	}
-}
-
-func httpd() {
-	r := gin.Default()
-	r.GET("/:stat", defaultRoute)
-
-	r.Run()
 }

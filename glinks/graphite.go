@@ -35,12 +35,18 @@ func destruct(metrics []Metric, value reflect.Value, prefix string, timestamp in
 			newPath := fmt.Sprintf("%s.%s", prefix, fieldName)
 			metrics = destruct(metrics, value.Field(i), newPath, timestamp)
 		}
-	case reflect.Array:
-		values := make([]interface{}, 0)
+	case reflect.Array, reflect.Slice:
 		for i := 0; i < value.Len(); i++ {
-			values = append(values, devalue(value.Field(i)))
+			newPath := fmt.Sprintf("%s.%d", prefix, i)
+			switch value.Index(i).Kind() {
+			case reflect.Struct, reflect.Array, reflect.Slice, reflect.Map:
+				metrics = destruct(metrics, value.Index(i), newPath, timestamp)
+			default:
+				metrics = append(metrics, Metric{Path: newPath,
+					Value:     devalue(value.Index(i)),
+					Timestamp: timestamp})
+			}
 		}
-		metrics = append(metrics, Metric{Path: prefix, Value: values, Timestamp: timestamp})
 	case reflect.Map:
 		for _, key := range value.MapKeys() {
 			newPath := fmt.Sprintf("%s.%s", prefix, key)
@@ -62,6 +68,8 @@ func devalue(value reflect.Value) interface{} {
 		return value.Int()
 	case reflect.Float32, reflect.Float64:
 		return value.Float()
+	default:
+		panic(fmt.Sprintf("Unhandled type: %s", value.Kind()))
 	}
 	return 0
 }
