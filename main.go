@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/mmessmore/glinks/cli"
-	"github.com/mmessmore/glinks/http"
 	"github.com/satori/go.uuid"
 )
 
@@ -47,8 +46,6 @@ func main() {
 		panic(err)
 	}
 
-	var doHttpd = flag.Bool("http", false, "HTTP/JSON daemon mode")
-
 	var cliChecks = flag.String("checks", "all", "Comma separated list of checks or 'all' for all")
 	var is_graphite = flag.Bool("graphite", false, "Use graphite output instead of JSON")
 	var prefix = flag.String("graphite-prefix", hostname, "Prefix for graphite values")
@@ -62,9 +59,5 @@ func main() {
 	checks := decode_checks(*cliChecks)
 
 	// If we're an httpd daemon, go do that
-	if *doHttpd {
-		http.Httpd(*dbPath)
-	} else {
-		cli.Cli(*dbPath, *dbId, checks, *is_graphite, *prefix, *count, *delay)
-	}
+	cli.Cli(*dbPath, *dbId, checks, *is_graphite, *prefix, *count, *delay)
 }
