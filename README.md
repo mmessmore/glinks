@@ -37,13 +37,10 @@ I also was just looking for a good excuse to use Go.  I'd written toys, but this
 * I want it to be compiled so I don't have interpreter/JVM overhead
 * I don't want to have to worry about the version of Ruby or Python on the host or that ships with Sensu or whatnot
 * Statically linked is a real plus for easy distribution, no library hell across distros and versions.
-* I want to use fun stuff like HTTP and JSON without a ton of headaches
 * I don't want to introduce a lot of memory issues with the strings coming from these text files
 
 
 ## TODO
 
-* Have command line support for calculating difference over time for things with counters like CPU stats
-* Output in straight graphite format
 * Support running as a daemon with an REST GET-only interface
 * Should I parse `/proc/zoneinfo` or anything else?
